@@ -1,0 +1,66 @@
+{
+    "name": "Go-devcontainer",
+
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [8080],
+
+    "features": {
+        "docker-in-docker": {
+            "version": "latest",
+            "moby": true,
+            "dockerDashComposeVersion": "v2"
+        },
+        "git": {
+            "version": "latest",
+            "ppa": false
+        },
+        "github-cli": "latest"
+    },
+
+    // Configure tool-specific properties.
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Set *default* container specific settings.json values on container create.
+            "settings": {
+                "go.toolsManagement.checkForUpdates": "local",
+                "go.useLanguageServer": true,
+                "go.gopath": "/go"
+            },
+
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "MS-CEINTL.vscode-language-pack-ja",
+                "golang.Go",
+                "golang.go-nightly",
+                "premparihar.gotestexplorer",
+                "GitHub.github-vscode-theme",
+                "GitHub.vscode-pull-request-github",
+                "gitpod.gitpod-desktop",
+                "ms-vscode.makefile-tools",
+                "redhat.vscode-yaml",
+                "bungcip.better-toml",
+                "ms-kubernetes-tools.vscode-kubernetes-tools",
+                "ckolkman.vscode-postgres",
+                "Dunn.redis",
+                "42Crunch.vscode-openapi",
+                "Arjun.swagger-viewer",
+                "PKief.material-icon-theme",
+                "oderwat.indent-rainbow",
+                "shardulm94.trailing-spaces",
+                "mosapride.zenkaku"
+            ]
+        }
+    },
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+
+    // Use 'postCreateCommand' to run commands after the container is created.
+    // "postCreateCommand": "go version",
+
+    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode"
+}
