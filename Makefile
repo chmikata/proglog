@@ -1,25 +1,27 @@
-.PHONY: help build build-local up down logs ps generate
 .DEFAULT_GOAL := help
 
+PROTOBUF := /usr/local/protobuf
+TMP := $(shell pwd)/tmp
 DOCKER_TAG := latest
-build: ## build docker image to dev
-	docker build -t chmikata/proglog:${DOCKER_TAG} --target dev ./
 
-build-local: ## Build docker image to local development
-	docker compose build --no-cache
+.PHONY: setup
+setup: grpcprotoc ## Setup tools.
 
-up: ## Do docker compose up with hot reload
-	docker compose up -d
+.PHONY: grpcprotoc
+grpcprotoc: ## Install Go-protobuf.
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+	go get -u google.golang.org/grpc
 
-down: ## Do docker compose down
-	docker compose down
+.PHONY: compile
+compile: ## Compile protobuf
+	protoc api/v1/*.proto --go_out=. --go_opt=paths=source_relative --proto_path=.
 
-logs: ## Tail docker compose logs
-	docker compose logs -f
+.PHONY: test
+test: ## Run go test
+	go test -race ./...
 
-ps: ## Check container status
-	docker compose ps
-
+.PHONY: generate
 generate: ## Generate codes
 	go generate ./...
 
