@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -71,9 +70,7 @@ func (l *Log) setup() error {
 		}
 	}
 	if l.segments == nil {
-		if err := l.newSegment(
-			l.Config.Segment.InitialOffset,
-		); err != nil {
+		if err := l.newSegment(l.Config.Segment.InitialOffset); err != nil {
 			return err
 		}
 	}
@@ -110,7 +107,7 @@ func (l *Log) Read(off uint64) (*api.Record, error) {
 		}
 	}
 	if seg == nil {
-		return nil, fmt.Errorf("offset out range: %d", off)
+		return nil, api.ErrOffsetOutOfRange{Offset: off}
 	}
 	return seg.Read(off)
 }

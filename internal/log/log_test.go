@@ -248,6 +248,7 @@ func TestLog_Read(t *testing.T) {
 				want := i[0].(*api.Record)
 				got := i[1].(*api.Record)
 				assert.Equal(t, want, got)
+				assert.IsType(t, api.ErrOffsetOutOfRange{}, err)
 				return assert.Error(tt, err)
 			},
 			setup: func(_ *Log, _ args) {},
@@ -281,9 +282,6 @@ func TestLog_LowestOffset(t *testing.T) {
 		},
 	}
 	log, _ := NewLog(dir, c)
-	type args struct {
-		off uint64
-	}
 	tests := []struct {
 		name      string
 		log       *Log
