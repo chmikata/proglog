@@ -5,15 +5,20 @@ import (
 	"net"
 	"os"
 	"testing"
+	"time"
 
 	api "github.com/chmikata/proglog/api/v1"
 	"github.com/chmikata/proglog/internal/auth"
 	"github.com/chmikata/proglog/internal/config"
 	"github.com/chmikata/proglog/internal/log"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+
 	"google.golang.org/grpc/status"
 )
 
@@ -90,6 +95,7 @@ func setupTest(t *testing.T, fn func(*Config)) (api.LogClient, api.LogClient, *C
 	require.NoError(t, err)
 
 	authorizer := auth.New(config.ACLModelFile, config.ACLPolicyFile)
+
 	cfg := &Config{
 		CommitLog:  clog,
 		Authorizer: authorizer,
@@ -97,7 +103,10 @@ func setupTest(t *testing.T, fn func(*Config)) (api.LogClient, api.LogClient, *C
 	if fn != nil {
 		fn(cfg)
 	}
-	server, err := NewGRPCServer(cfg, grpc.Creds(serverCreds))
+	sr := tracetest.NewSpanRecorder()
+	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+
+	server, err := NewGRPCServer(cfg, tp, grpc.Creds(serverCreds))
 	require.NoError(t, err)
 
 	go func() {
@@ -109,6 +118,13 @@ func setupTest(t *testing.T, fn func(*Config)) (api.LogClient, api.LogClient, *C
 		nobodyConn.Close()
 		server.Stop()
 		l.Close()
+		stack := sr.Ended()
+		for k, v := range stack {
+			if v != nil {
+				t.Log(k, v)
+			}
+		}
+		tp.Shutdown(context.Background())
 	}
 }
 
@@ -183,6 +199,7 @@ func testProduceConsumeStream(t *testing.T, client, _ api.LogClient, cfg *Config
 			t.Fatalf("got offset: %d, want: %d", res.Offset, offset)
 		}
 	}
+	pstream.CloseSend()
 
 	cstream, err := client.ConsumeStream(ctx, &api.ConsumeRequest{Offset: 0})
 	require.NoError(t, err)
@@ -195,6 +212,8 @@ func testProduceConsumeStream(t *testing.T, client, _ api.LogClient, cfg *Config
 			Offset: uint64(i),
 		})
 	}
+	cstream.SendMsg("done")
+	time.Sleep(1500 * time.Millisecond)
 }
 
 func testUnauthorized(t *testing.T, _, client api.LogClient, cfg *Config) {

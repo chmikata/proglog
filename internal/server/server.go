@@ -5,13 +5,15 @@ import (
 	"time"
 
 	api "github.com/chmikata/proglog/api/v1"
-
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
+
 	"google.golang.org/grpc/status"
 )
 
@@ -42,12 +44,24 @@ type Authorizer interface {
 	Authorize(subject, object, action string) error
 }
 
-func NewGRPCServer(config *Config, grpcOpts ...grpc.ServerOption) (*grpc.Server, error) {
+func NewGRPCServer(config *Config,
+	tp *trace.TracerProvider,
+	grpcOpts ...grpc.ServerOption) (*grpc.Server, error) {
+
+	interceptorOpt := otelgrpc.WithTracerProvider(tp)
 	grpcOpts = append(grpcOpts,
 		grpc.StreamInterceptor(
-			grpc_middleware.ChainStreamServer(grpc_auth.StreamServerInterceptor(authenticate))),
+			grpc_middleware.ChainStreamServer(
+				otelgrpc.StreamServerInterceptor(interceptorOpt),
+				grpc_auth.StreamServerInterceptor(authenticate),
+			),
+		),
 		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(grpc_auth.UnaryServerInterceptor(authenticate))),
+			grpc_middleware.ChainUnaryServer(
+				otelgrpc.UnaryServerInterceptor(interceptorOpt),
+				grpc_auth.UnaryServerInterceptor(authenticate),
+			),
+		),
 	)
 	gsrv := grpc.NewServer(grpcOpts...)
 	srv, err := newgrpcServer(config)
@@ -66,7 +80,6 @@ func newgrpcServer(config *Config) (*grpcServer, error) {
 }
 
 func (s *grpcServer) Produce(ctx context.Context, req *api.ProduceRequest) (*api.ProduceResponse, error) {
-	offset, err := s.CommitLog.Append(req.Record)
 	if err := s.Authorizer.Authorize(
 		subject(ctx),
 		objectWildcard,
@@ -74,6 +87,7 @@ func (s *grpcServer) Produce(ctx context.Context, req *api.ProduceRequest) (*api
 	); err != nil {
 		return nil, err
 	}
+	offset, err := s.CommitLog.Append(req.Record)
 	if err != nil {
 		return nil, err
 	}
