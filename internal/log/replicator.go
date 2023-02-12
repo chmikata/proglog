@@ -14,7 +14,7 @@ type Replicator struct {
 	LocalServer api.LogClient
 	logger      *zap.Logger
 	mu          sync.Mutex
-	Servers     map[string]chan struct{}
+	servers     map[string]chan struct{}
 	closed      bool
 	close       chan struct{}
 }
@@ -27,13 +27,13 @@ func (r *Replicator) Join(name, addr string) error {
 	if r.closed {
 		return nil
 	}
-	if _, ok := r.Servers[name]; ok {
+	if _, ok := r.servers[name]; ok {
 		// already replicated
 		return nil
 	}
-	r.Servers[name] = make(chan struct{})
+	r.servers[name] = make(chan struct{})
 
-	go r.replicate(addr, r.Servers[name])
+	go r.replicate(addr, r.servers[name])
 
 	return nil
 }
@@ -94,11 +94,11 @@ func (r *Replicator) Leave(name string) error {
 	defer r.mu.Unlock()
 	r.init()
 
-	if _, ok := r.Servers[name]; !ok {
+	if _, ok := r.servers[name]; !ok {
 		return nil
 	}
-	close(r.Servers[name])
-	delete(r.Servers, name)
+	close(r.servers[name])
+	delete(r.servers, name)
 	return nil
 }
 
@@ -106,8 +106,8 @@ func (r *Replicator) init() {
 	if r.logger == nil {
 		r.logger = zap.L().Named("replicator")
 	}
-	if r.Servers == nil {
-		r.Servers = make(map[string]chan struct{})
+	if r.servers == nil {
+		r.servers = make(map[string]chan struct{})
 	}
 	if r.close == nil {
 		r.close = make(chan struct{})

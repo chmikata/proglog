@@ -17,18 +17,18 @@ func Test_newIndex(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 100,
+			MaxIndexBytes: 100,
 			InitialOffset: 0,
 		},
 	}
 	idx := index{
 		file: f,
 	}
-	os.Truncate(f.Name(), int64(c.Segment.MaxindexBytes))
+	os.Truncate(f.Name(), int64(c.Segment.MaxIndexBytes))
 	fi, _ := os.Stat(f.Name())
 	idx.size = uint64(fi.Size())
 	idx.mmap, _ = gommap.Map(
@@ -73,11 +73,11 @@ func Test_index_Close(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 100,
+			MaxIndexBytes: 100,
 			InitialOffset: 0,
 		},
 	}
@@ -117,11 +117,11 @@ func Test_index_Read(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 100,
+			MaxIndexBytes: 100,
 			InitialOffset: 0,
 		},
 	}
@@ -212,11 +212,11 @@ func Test_index_Write(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 12,
+			MaxIndexBytes: 12,
 			InitialOffset: 0,
 		},
 	}
@@ -265,11 +265,11 @@ func Test_index_isMaxed(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 12,
+			MaxIndexBytes: 12,
 			InitialOffset: 0,
 		},
 	}
@@ -311,11 +311,11 @@ func Test_index_Name(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 12,
+			MaxIndexBytes: 12,
 			InitialOffset: 0,
 		},
 	}

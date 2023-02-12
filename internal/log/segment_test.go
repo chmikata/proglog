@@ -27,11 +27,11 @@ func Test_newSegment(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 100,
+			MaxIndexBytes: 100,
 			InitialOffset: 0,
 		},
 	}
@@ -94,11 +94,11 @@ func Test_segment_Append(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 24,
+			MaxIndexBytes: 24,
 			InitialOffset: 0,
 		},
 	}
@@ -166,11 +166,11 @@ func Test_segment_Read(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 24,
+			MaxIndexBytes: 24,
 			InitialOffset: 0,
 		},
 	}
@@ -245,11 +245,11 @@ func Test_segment_IsMaxed(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 12,
+			MaxIndexBytes: 12,
 			InitialOffset: 0,
 		},
 	}
@@ -293,11 +293,11 @@ func Test_segment_Remove(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 12,
+			MaxIndexBytes: 12,
 			InitialOffset: 0,
 		},
 	}
@@ -345,11 +345,11 @@ func Test_segment_Close(t *testing.T) {
 	c := Config{
 		Segment: struct {
 			MaxStoreBytes uint64
-			MaxindexBytes uint64
+			MaxIndexBytes uint64
 			InitialOffset uint64
 		}{
 			MaxStoreBytes: 100,
-			MaxindexBytes: 100,
+			MaxIndexBytes: 100,
 			InitialOffset: 0,
 		},
 	}
