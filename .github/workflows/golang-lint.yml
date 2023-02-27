@@ -1,0 +1,34 @@
+name: golang-ci
+on:
+  pull_request:
+    paths:
+      - "**.go"
+      - .github/workflows/golangci.yml
+jobs:
+  golangci-lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+      - name: golangci-lint with reviewdog
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          golangci_lint_flags: "--config=./.golangci.yml ./..."
+          fail_on_error: true
+          reporter: "github-pr-review"
+      - name: Notify slack when job failed
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "job_id": "${{ github.job }}",
+              "author": "${{ github.event.sender.login }}",
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "repo_name": "${{ github.event.repository.full_name }}",
+              "status": "${{ job.status }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WORKFLOW_WEBHOOK_URL }}

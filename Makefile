@@ -1,25 +1,65 @@
-.PHONY: help build build-local up down logs ps generate
 .DEFAULT_GOAL := help
+CONFIG_PATH := ${HOME}/.proglog/
+PROTOBUF := /usr/local/protobuf
 
-DOCKER_TAG := latest
-build: ## build docker image to dev
-	docker build -t chmikata/proglog:${DOCKER_TAG} --target dev ./
+.PHONY: init
+init:
+	mkdir -p ${CONFIG_PATH}
 
-build-local: ## Build docker image to local development
-	docker compose build --no-cache
+.PHONY: gencert
+gencert: ## Generate Certs
+	cfssl gencert \
+		-initca test/ca-csr.json | cfssljson -bare ca
 
-up: ## Do docker compose up with hot reload
-	docker compose up -d
+	cfssl gencert \
+		-ca=ca.pem \
+		-ca-key=ca-key.pem \
+		-config=test/ca-config.json \
+		-profile=server \
+		test/server-csr.json | cfssljson -bare server
 
-down: ## Do docker compose down
-	docker compose down
+	cfssl gencert \
+		-ca=ca.pem \
+		-ca-key=ca-key.pem \
+		-config=test/ca-config.json \
+		-profile=client \
+		-cn="root" \
+		test/client-csr.json | cfssljson -bare root-client
 
-logs: ## Tail docker compose logs
-	docker compose logs -f
+	cfssl gencert \
+		-ca=ca.pem \
+		-ca-key=ca-key.pem \
+		-config=test/ca-config.json \
+		-profile=client \
+		-cn="nobdy" \
+		test/client-csr.json | cfssljson -bare nobody-client
 
-ps: ## Check container status
-	docker compose ps
+	mv *.pem *.csr ${CONFIG_PATH}
 
+$(CONFIG_PATH)/model.conf:
+	cp test/model.conf $(CONFIG_PATH)/model.conf
+
+$(CONFIG_PATH)/policy.csv:
+	cp test/policy.csv $(CONFIG_PATH)/policy.csv
+
+.PHONY: test
+test: $(CONFIG_PATH)/model.conf $(CONFIG_PATH)/policy.csv ## Run go test
+	go test -race ./...
+
+.PHONY: setup
+setup: grpcprotoc ## Setup tools.
+
+.PHONY: grpcprotoc
+grpcprotoc: ## Install Go-protobuf.
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+	go get -u google.golang.org/grpc
+
+.PHONY: compile
+compile: ## Compile protobuf with gRPC
+	protoc api/v1/*.proto --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative --proto_path=.
+
+.PHONY: generate
 generate: ## Generate codes
 	go generate ./...
 

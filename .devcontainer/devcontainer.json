@@ -6,28 +6,78 @@
     "workspaceFolder": "/workspace",
     "forwardPorts": [8080],
 
-    "features": {
-        "docker-in-docker": {
-            "version": "latest",
-            "moby": true,
-            "dockerDashComposeVersion": "v2"
-        },
-        "git": {
-            "version": "latest",
-            "ppa": false
-        },
-        "github-cli": "latest"
-    },
-
     // Configure tool-specific properties.
     "customizations": {
         // Configure properties specific to VS Code.
         "vscode": {
             // Set *default* container specific settings.json values on container create.
             "settings": {
+                "remote.containers.executeInWSL": true,
                 "go.toolsManagement.checkForUpdates": "local",
+                "go.toolsManagement.autoUpdate": true,
                 "go.useLanguageServer": true,
-                "go.gopath": "/go"
+                "go.gopath": "/go",
+                "go.formatTool": "goimports",
+                "go.trace.server": "messages",
+                "go.useCodeSnippetsOnFunctionSuggest": true,
+                "go.useCodeSnippetsOnFunctionSuggestWithoutType": true,
+                "go.inlayHints.parameterNames": true,
+                "go.inlayHints.rangeVariableTypes": true,
+                "go.inlayHints.functionTypeParameters": true,
+                "go.inlayHints.constantValues": true,
+                "go.inlayHints.assignVariableTypes": true,
+                "go.inlayHints.compositeLiteralFields": true,
+                "go.inlayHints.compositeLiteralTypes": true,
+                "[go]": {
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": false
+                    }
+                },
+                "go.generateTestsFlags": [
+                    "-template",
+                    "testify"
+                ],
+                "gopls": {
+                    "analyses": {
+                        "shadow": true
+                    }
+                },
+                "goOutliner.extendExplorerTab": true,
+                "goOutliner.enableDebugChannel": true,
+                "editor.inlayHints.enabled": "offUnlessPressed",
+                "redhat.telemetry.enabled": true,
+                "vs-kubernetes": {
+                    "vscode-kubernetes.helm-path.windows": "C:\\Users\\chikahisa.mikata\\.vs-kubernetes\\tools\\helm\\windows-amd64\\helm.exe",
+                    "vscode-kubernetes.helm-path.linux": "/home/mikata/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
+                    "vscode-kubernetes.minikube-path.linux": "/home/mikata/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
+                },
+                "git.suggestSmartCommit": false,
+                "githubPullRequests.queries": [
+                    {
+                        "label": "Waiting For My Review",
+                        "query": "is:open review-requested:${user}"
+                    },
+                    {
+                        "label": "Assigned To Me",
+                        "query": "is:open assignee:${user}"
+                    },
+                    {
+                        "label": "Created By Me",
+                        "query": "is:open author:${user}"
+                    }
+                ],
+                "files.associations": {
+                    "*.json.golden": "json"
+                },
+                "diffEditor.ignoreTrimWhitespace": false,
+                "workbench.colorTheme": "GitHub Dark Default",
+                "workbench.iconTheme": "material-icon-theme",
+                "markdown.marp.enableHtml": true,
+                "markdown.marp.exportType": "pptx",
+                "protoc": {
+                    "editor.formatOnSave": true
+                }
             },
 
             // Add the IDs of extensions you want installed when the container is created.
@@ -43,6 +93,7 @@
                 "redhat.vscode-yaml",
                 "bungcip.better-toml",
                 "ms-kubernetes-tools.vscode-kubernetes-tools",
+                "ms-azuretools.vscode-docker",
                 "ckolkman.vscode-postgres",
                 "Dunn.redis",
                 "42Crunch.vscode-openapi",
@@ -50,7 +101,8 @@
                 "PKief.material-icon-theme",
                 "oderwat.indent-rainbow",
                 "shardulm94.trailing-spaces",
-                "mosapride.zenkaku"
+                "mosapride.zenkaku",
+                "streetsidesoftware.code-spell-checker"
             ]
         }
     },
