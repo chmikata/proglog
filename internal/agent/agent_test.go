@@ -1,4 +1,4 @@
-package agent
+package agent_test
 
 import (
 	"context"
@@ -9,11 +9,13 @@ import (
 	"time"
 
 	api "github.com/chmikata/proglog/api/v1"
+	"github.com/chmikata/proglog/internal/agent"
 	"github.com/chmikata/proglog/internal/config"
 	"github.com/stretchr/testify/require"
 	"github.com/travisjeffery/go-dynaport"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 func TestAgent(t *testing.T) {
@@ -35,7 +37,7 @@ func TestAgent(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	var agents []*Agent
+	var agents []*agent.Agent
 	for i := 0; i < 3; i++ {
 		ports := dynaport.Get(2)
 		bindAddr := fmt.Sprintf("%s:%d", "127.0.0.1", ports[0])
@@ -48,11 +50,11 @@ func TestAgent(t *testing.T) {
 		if i != 0 {
 			startJoinAddrs = append(
 				startJoinAddrs,
-				agents[0].BindAddr,
+				agents[0].Config.BindAddr,
 			)
 		}
 
-		agent, err := New(Config{
+		agent, err := agent.New(agent.Config{
 			NodeName:        fmt.Sprintf("%d", i),
 			StartJoinAddrs:  startJoinAddrs,
 			BindAddr:        bindAddr,
@@ -62,6 +64,7 @@ func TestAgent(t *testing.T) {
 			ACLPolicyFile:   config.ACLPolicyFile,
 			ServerTLSConfig: serverTLSConfig,
 			PeerTLSConfig:   peerTLSConfig,
+			Bootstrap:       i == 0,
 		})
 		require.NoError(t, err)
 		agents = append(agents, agent)
@@ -70,7 +73,7 @@ func TestAgent(t *testing.T) {
 		for _, agent := range agents {
 			err := agent.Shutdown()
 			require.NoError(t, err)
-			require.NoError(t, os.RemoveAll(agent.DataDir))
+			require.NoError(t, os.RemoveAll(agent.Config.DataDir))
 		}
 	}()
 	time.Sleep(3 * time.Second)
@@ -113,16 +116,21 @@ func TestAgent(t *testing.T) {
 			Offset: produceResponse.Offset + 1,
 		},
 	)
+	require.Nil(t, consumeResponse)
+	require.Error(t, err)
+	got := status.Code(err)
+	want := status.Code(api.ErrOffsetOutOfRange{}.GRPCStatus().Err())
+	require.Equal(t, got, want)
 }
 
 func client(
 	t *testing.T,
-	agent *Agent,
+	agent *agent.Agent,
 	tlsConfig *tls.Config,
 ) api.LogClient {
 	tlsCreds := credentials.NewTLS(tlsConfig)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(tlsCreds)}
-	rpcAddr, err := agent.RPCAddr()
+	rpcAddr, err := agent.Config.RPCAddr()
 	require.NoError(t, err)
 
 	conn, err := grpc.Dial(rpcAddr, opts...)
