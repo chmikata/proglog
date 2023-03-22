@@ -5,21 +5,27 @@ import (
 	"time"
 
 	api "github.com/chmikata/proglog/api/v1"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/sdk/trace"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
-
 	"google.golang.org/grpc/status"
+
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type Config struct {
-	CommitLog  CommitLog
-	Authorizer Authorizer
+	CommitLog   CommitLog
+	Authorizer  Authorizer
+	GetServerer GetServerer
 }
 
 const (
@@ -64,6 +70,11 @@ func NewGRPCServer(config *Config,
 		),
 	)
 	gsrv := grpc.NewServer(grpcOpts...)
+
+	hsrv := health.NewServer()
+	hsrv.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(gsrv, hsrv)
+
 	srv, err := newgrpcServer(config)
 	if err != nil {
 		return nil, err
@@ -146,6 +157,18 @@ func (s *grpcServer) ConsumeStream(req *api.ConsumeRequest, stream api.Log_Consu
 			req.Offset++
 		}
 	}
+}
+
+func (s *grpcServer) GetServers(ctx context.Context, req *api.GetServersRequest) (*api.GetServersResponse, error) {
+	servers, err := s.GetServerer.GetServers()
+	if err != nil {
+		return nil, err
+	}
+	return &api.GetServersResponse{Servers: servers}, nil
+}
+
+type GetServerer interface {
+	GetServers() ([]*api.Server, error)
 }
 
 func authenticate(ctx context.Context) (context.Context, error) {

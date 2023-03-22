@@ -63,6 +63,13 @@ compile: ## Compile protobuf with gRPC
 generate: ## Generate codes
 	go generate ./...
 
+TAG := 0.0.1
+
+.PHONY: build-docker
+build-docker: ## Build Cocker image
+	docker build -t github.com/chmikata/proglog:$(TAG) .
+
+
 help: ## Show options
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

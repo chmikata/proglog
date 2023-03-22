@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
+        "cmux",
         "cstream",
         "dynaport",
         "gsrv",
+        "loadbalance",
         "newgrpc",
         "permited",
         "proglog",

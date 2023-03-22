@@ -1,0 +1,14 @@
+FROM golang:1.19-bullseye as build
+WORKDIR /go/src/prglog
+COPY . .
+RUN CGO_ENABLE=0 go build -o /go/bin/proglog ./cmd/proglog
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.8 && \
+    wget -qO/go/bin/grpc_health_probe \
+    https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/\
+${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /go/bin/grpc_health_probe
+
+FROM alpine:latest
+COPY --from=build /go/bin/proglog /bin/proglog
+COPY --from=build /go/bin/grpc_health_probe /bin/grpc_health_probe
+ENTRYPOINT ["/bin/proglog"]
