@@ -65,10 +65,13 @@ generate: ## Generate codes
 
 TAG := 0.0.1
 
-.PHONY: build-docker
-build-docker: ## Build Cocker image
-	docker build -t github.com/chmikata/proglog:$(TAG) .
+.PHONY: build-docker-proglog
+build-docker-proglog: ## Build Docker image
+	docker build -t github.com/chmikata/proglog:$(TAG) -f ./Dockerfile-proglog .
 
+.PHONY: build-docker-getservers
+build-docker-getservers: ## Build Docker image
+	docker build -t github.com/chmikata/getservers:$(TAG) -f ./Dockerfile-getservers .
 
 help: ## Show options
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \

@@ -1,0 +1,8 @@
+FROM golang:1.19-alpine as build
+WORKDIR /go/src/prglog
+COPY . .
+RUN CGO_ENABLE=0 go build -o /go/bin/getservers ./cmd/getservers
+
+FROM alpine:latest
+COPY --from=build /go/bin/getservers /bin/getservers
+ENTRYPOINT ["/bin/sh", "-c", "while :; do sleep 10; done"]
