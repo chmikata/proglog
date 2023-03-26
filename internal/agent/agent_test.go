@@ -11,6 +11,7 @@ import (
 	api "github.com/chmikata/proglog/api/v1"
 	"github.com/chmikata/proglog/internal/agent"
 	"github.com/chmikata/proglog/internal/config"
+	"github.com/chmikata/proglog/internal/loadbalance"
 	"github.com/stretchr/testify/require"
 	"github.com/travisjeffery/go-dynaport"
 	"google.golang.org/grpc"
@@ -76,7 +77,6 @@ func TestAgent(t *testing.T) {
 			require.NoError(t, os.RemoveAll(agent.Config.DataDir))
 		}
 	}()
-	time.Sleep(3 * time.Second)
 
 	leaderClient := client(t, agents[0], peerTLSConfig)
 	produceResponse, err := leaderClient.Produce(
@@ -89,6 +89,8 @@ func TestAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	time.Sleep(3 * time.Second)
+
 	consumeResponse, err := leaderClient.Consume(
 		context.Background(),
 		&api.ConsumeRequest{
@@ -97,8 +99,6 @@ func TestAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Equal(t, consumeResponse.Record.Value, []byte("foo"))
-
-	time.Sleep(3 * time.Second)
 
 	followerClient := client(t, agents[1], peerTLSConfig)
 	consumeResponse, err = followerClient.Consume(
@@ -133,7 +133,11 @@ func client(
 	rpcAddr, err := agent.Config.RPCAddr()
 	require.NoError(t, err)
 
-	conn, err := grpc.Dial(rpcAddr, opts...)
+	conn, err := grpc.Dial(fmt.Sprintf(
+		"%s:///%s",
+		loadbalance.Name,
+		rpcAddr,
+	), opts...)
 	require.NoError(t, err)
 
 	client := api.NewLogClient(conn)
