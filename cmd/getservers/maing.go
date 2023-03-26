@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	addr := flag.String("addr", "proglog-0.proglog.default.svc.cluster.local:8400", "service address")
+	addr := flag.String("addr", ":8400", "service address")
 	flag.Parse()
 	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

@@ -4,11 +4,14 @@
         "cstream",
         "dynaport",
         "gsrv",
+        "jsonnetd",
         "loadbalance",
+        "metacontroller",
         "newgrpc",
         "permited",
         "proglog",
         "pstream",
+        "statefulsets",
         "stretchr"
     ]
 }
