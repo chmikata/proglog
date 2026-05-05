@@ -1,6 +1,6 @@
 module github.com/chmikata/proglog
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/casbin/casbin v1.9.1
@@ -16,7 +16,7 @@ require (
 	github.com/tysonmote/gommap v0.0.2
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.11.2
-	go.opentelemetry.io/otel/sdk v1.39.0
+	go.opentelemetry.io/otel/sdk v1.43.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217
 	google.golang.org/grpc v1.79.3
@@ -59,13 +59,13 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel v1.41.0 // indirect
-	go.opentelemetry.io/otel/metric v1.41.0 // indirect
-	go.opentelemetry.io/otel/trace v1.41.0 // indirect
+	go.opentelemetry.io/otel v1.43.0 // indirect
+	go.opentelemetry.io/otel/metric v1.43.0 // indirect
+	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
